@@ -1,4 +1,4 @@
-const { Client, Intents, MessageAttachment, MessageEmbed } = require('discord.js');
+const { Client, Intents, MessageAttachment, MessageEmbed, TextChannel } = require('discord.js');
 
 console.log('XWF Deathmatch running');
 
@@ -182,10 +182,10 @@ const decideTurn = () => {
   return (outcome > 50);
 }
 
-const initiateFight = async (msg, combatants) => {
+const initiateFight = async (textChannel, combatants) => {
   const file = new MessageAttachment('./assets/xwf_logo.png');
 
-  msg.reply({ files: [file] });
+  textChannel.send({ files: [file] });
 
   await delay(1000);
 
@@ -204,7 +204,7 @@ const initiateFight = async (msg, combatants) => {
     .setTitle('DEATHMATCH: '+combatants[0]+' vs '+combatants[1])
     .setDescription(combatants[0]+" and "+combatants[1]+" meet in the center of the ring!");
 
-  msg.reply({ embeds: [embed] }).then(newMsg => {
+  textChannel.send({ embeds: [embed] }).then(newMsg => {
     fight(newMsg, combatantOne, combatantTwo);
   });
 };
@@ -215,20 +215,24 @@ client.on("ready", () => {
 
 client.on("messageCreate", msg => {
   console.log(msg.content);
+
+  const textChannel = msg.channel;
+
+  console.log(textChannel);
   
   const content = msg.content;
   const mentions = msg.mentions;
 
   if (content.includes("--xwf-deathmatch")) {
     if (content.includes("--help")) {
-      msg.reply("THE ACTION NEVER SLOWS DOWN! SELECT YOUR COMBATANTS AND SEND THEM TO THE RING!")
+      textChannel.send("THE ACTION NEVER SLOWS DOWN! SELECT YOUR COMBATANTS AND SEND THEM TO THE RING!")
     } else {
       const combatants = generateCombatants(mentions);
 
       console.log('mentions');
       console.log(mentions);
 
-      initiateFight(msg, combatants);
+      initiateFight(textChannel, combatants);
     }
   }
 });
