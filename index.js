@@ -1,4 +1,4 @@
-const { Client, Intents } = require('discord.js');
+const { Client, Intents, MessageAttachment, MessageEmbed } = require('discord.js');
 
 console.log('XWF Deathmatch running');
 
@@ -8,27 +8,46 @@ const delay = (time) => {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 
-const generateCombatants = (msgContent) => {
-  const msgArr = msgContent.split(" ");
+const generateCombatants = (mentions) => {
+  const users = mentions.users;
+  const roles = mentions.roles;
 
-  if (msgArr.length === 1) {
+  const userArr = [];
+  const roleArr = [];
+  
+  users.forEach((username, id) => userArr.push({
+    key: id,
+    value: username?.username
+  }));
+
+  roles.forEach((name, id) => roleArr.push({
+    key: id,
+    value: name?.name
+  }));
+
+  const namesArr = userArr.concat(roleArr);
+
+  console.log('namesArr');
+  console.log(namesArr);
+
+  if (namesArr.length === 0) {
     return ["Jobber1", "Jobber2"];
-  } else if (msgArr.length === 2) {
-    return [msgArr[1], "Jobber"];
+  } else if (namesArr.length === 1) {
+    return [namesArr[0].value, "Jobber"];
   }
 
-  return [msgArr[1], msgArr[2]];
+  return [namesArr[0].value, namesArr[1].value];
 };
 
 const selectWeapon = (damage) => {
   if (damage > 35) {
-    return "BOMB!"
+    return "BOMB"
   } else if (damage > 30) {
     return "Honda Civic"
   } else if (damage > 25) {
     return "Lightning Strike"
   } else if (damage > 20) {
-    return "Bullet from a Gun"
+    return "Bullet... from a Gun"
   } else if (damage > 15) {
     return "Shovel"
   } else if (damage > 10) {
@@ -45,11 +64,16 @@ const selectWeapon = (damage) => {
 const generateFailure = (newMsg, attackerName, damage, sentences) => {
   const selfDamage = -1*damage;
 
-  const newSentence = attackerName+ " trips mid-move and deals "+ selfDamage + "to themselves!";
+  const newSentence = attackerName+ " trips mid-move and deals "+ selfDamage + " to themselves!";
 
   const newSentences = updateSentences(newSentence, sentences);
 
-  newMsg.edit(newSentences.join('\r\n'));
+  const newEmbed = new MessageEmbed()
+    .setColor(0x0099ff)
+    .setTitle(newMsg.embeds[0].title)
+    .setDescription(newSentences.join('\r\n'));  
+
+  newMsg.edit({ embeds: [newEmbed] });
 
   return sentences;
 }
@@ -59,9 +83,16 @@ const generateAttack = (newMsg, attackerName, victimName, damage, sentences) => 
 
   const newSentence = attackerName + " hits "+ victimName + " with a "+ weapon +" for "+damage+" damage!";
 
-  const newSentences = updateSentences(newSentence, sentences);  
+  const newSentences = updateSentences(newSentence, sentences);
 
-  newMsg.edit(newSentences.join('\r\n'));
+  const file = new MessageAttachment('./assets/xwf_logo.png');
+
+  const newEmbed = new MessageEmbed()
+    .setColor(0x0099ff)
+    .setTitle(newMsg.embeds[0].title)
+    .setDescription(newSentences.join('\r\n'));  
+
+  newMsg.edit({ embeds: [newEmbed] });
 
   return newSentences;
 }
@@ -91,7 +122,12 @@ const fight = async (newMsg, combatantOne, combatantTwo) => {
 
   sentences.push("The first attack goes to " + firstTurnPlayer);
 
-  newMsg.edit(sentences.join('\r\n'));
+  const newEmbed = new MessageEmbed()
+    .setColor(0x0099ff)
+    .setTitle(newMsg.embeds[0].title)
+    .setDescription(sentences.join('\r\n'));  
+
+  newMsg.edit({ embeds: [newEmbed] });
 
   while (combatantOne.hp > 0 && combatantTwo.hp > 0) {
     await delay(1000);
@@ -132,7 +168,12 @@ const generateWinnerStatement = (newMsg, sentences, winner) => {
 
   const newSentences = updateSentences(newSentence, sentences);
 
-  newMsg.edit(newSentences.join('\r\n'));
+  const newEmbed = new MessageEmbed()
+    .setColor(0x0099ff)
+    .setTitle(newMsg.embeds[0].title)
+    .setDescription(newSentences.join('\r\n'));  
+
+  newMsg.edit({ embeds: [newEmbed] });
 }
 
 const decideTurn = () => {
@@ -141,7 +182,13 @@ const decideTurn = () => {
   return (outcome > 50);
 }
 
-const initiateFight = (msg, combatants) => {
+const initiateFight = async (msg, combatants) => {
+  const file = new MessageAttachment('./assets/xwf_logo.png');
+
+  msg.reply({ files: [file] });
+
+  await delay(1000);
+
   let combatantOne = {
     name: combatants[0],
     hp: 100
@@ -152,9 +199,12 @@ const initiateFight = (msg, combatants) => {
     hp: 100
   };
 
-  let newMessage;
+  const embed = new MessageEmbed()
+    .setColor(0x0099ff)
+    .setTitle('DEATHMATCH: '+combatants[0]+' vs '+combatants[1])
+    .setDescription(combatants[0]+" and "+combatants[1]+" meet in the center of the ring!");
 
-  msg.reply(combatants[0]+" and "+combatants[1]+" meet in the center of the ring!").then(newMsg => {
+  msg.reply({ embeds: [embed] }).then(newMsg => {
     fight(newMsg, combatantOne, combatantTwo);
   });
 };
@@ -167,12 +217,16 @@ client.on("messageCreate", msg => {
   console.log(msg.content);
   
   const content = msg.content;
+  const mentions = msg.mentions;
 
   if (content.includes("--xwf-deathmatch")) {
     if (content.includes("--help")) {
       msg.reply("THE ACTION NEVER SLOWS DOWN! SELECT YOUR COMBATANTS AND SEND THEM TO THE RING!")
     } else {
-      const combatants = generateCombatants(content);
+      const combatants = generateCombatants(mentions);
+
+      console.log('mentions');
+      console.log(mentions);
 
       initiateFight(msg, combatants);
     }
