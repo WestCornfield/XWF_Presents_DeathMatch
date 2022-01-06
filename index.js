@@ -4,6 +4,10 @@ console.log('XWF Deathmatch running');
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
+const delay = (time) => {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
+
 const generateCombatants = (msgContent) => {
   const msgArr = msgContent.split(" ");
 
@@ -16,13 +20,35 @@ const generateCombatants = (msgContent) => {
   return [msgArr[1], msgArr[2]];
 };
 
-const fightText = (msg, combatantOne, combatantTwo) => {
-    msg.reply(combatants[0]+" and "+combatants[1]+" meet in the center of the ring!").then(newMessage => {
-      newMessage.edit("The bell rings!");
-      newMessage.edit(combatants[0]+" hits "+combatants[1]+" with a right hook for 100 damage!")
-      newMessage.edit(combatants[1]+" goes down!")
-      newMessage.edit("The winner is "+combatants[0]);
-    });
+const fight = async (newMsg, combatantOne, combatantTwo) => {
+  let playerOnesTurn = decideTurn();
+
+  const firstTurnPlayer = (playerOnesTurn) ? combatantOne.name : combatantTwo.name;
+
+  newMsg.edit("The first attack goes to " + firstTurnPlayer);
+
+  while (combatantOne.hp > 0 && combatantTwo.hp > 0) {
+    await delay(1000);
+
+    let damage = Math.floor(Math.random() * 30);
+
+    if (playerOnesTurn) {
+      newMsg.edit(combatantOne.name +" hits "+combatantTwo.name+" with a right hook for " + damage + " damage!");
+      combatantTwo.hp -= damage;
+    } else {
+      newMsg.edit(combatantTwo.name+" hits "+combatantOne.name+" with a right hook for " + damage + " damage!");
+      combatantOne.hp -= damage;
+    }
+
+    console.log('combatantOne.hp = ' + combatantOne.hp)
+    console.log('combatantTwo.hp = ' + combatantTwo.hp)
+
+    playerOnesTurn = !playerOnesTurn;
+  }
+
+  const winner = (combatantOne.hp <= 0) ? combatantTwo.name : combatantOne.name
+
+  newMsg.edit("The winner is " + winner + "!");
 }
 
 const decideTurn = () => {
@@ -31,7 +57,7 @@ const decideTurn = () => {
   return (outcome > 50);
 }
 
-const startFight = (msg, combatants) => {
+const initiateFight = (msg, combatants) => {
   let combatantOne = {
     name: combatants[0],
     hp: 100
@@ -45,31 +71,8 @@ const startFight = (msg, combatants) => {
   let newMessage;
 
   msg.reply(combatants[0]+" and "+combatants[1]+" meet in the center of the ring!").then(newMsg => {
-    newMessage = newMsg;
-  })
-
-  let playerOnesTurn = decideTurn();
-
-  while (combatantOne.hp > 0 && combatantTwo.hp > 0) {
-    console.log('combatantOne.hp = ' + combatantOne.hp)
-    console.log('combatantTwo.hp = ' + combatantTwo.hp)
-
-    let damage = Math.floor(Math.random() * 30);
-
-    if (playerOnesTurn) {
-      combatantTwo.health -= damage;
-      newMessage.edit(combatants[0]+" hits "+combatants[1]+" with a right hook for " + damage + " damage!");
-    } else {
-      combatantOne.health -= damage;
-      newMessage.edit(combatants[0]+" hits "+combatants[1]+" with a right hook for " + damage + " damage!");
-    }
-
-    playerOnesTurn = !playerOnesTurn;
-  }
-
-  const winner = (combatantOne.hp <= 0) ? combatantTwo.name : combatantOne.name
-
-  msg.edit("The winner is " + winner + "!");
+    fight(newMsg, combatantOne, combatantTwo);
+  });
 };
 
 client.on("ready", () => {
@@ -87,7 +90,7 @@ client.on("messageCreate", msg => {
     } else {
       const combatants = generateCombatants(content);
 
-      startFight(msg, combatants);
+      initiateFight(msg, combatants);
     }
   }
 });
