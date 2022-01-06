@@ -42,8 +42,10 @@ const selectWeapon = (damage) => {
   }
 }
 
-const generateFailure = (newMsg, attackerName, damage) => {
-  const newSentence = attackerName+ " trips mid-move and deals "+ -1*damage + "to themselves!";
+const generateFailure = (newMsg, attackerName, damage, sentences) => {
+  const selfDamage = -1*damage;
+
+  const newSentence = attackerName+ " trips mid-move and deals "+ selfDamage + "to themselves!";
 
   const newSentences = updateSentences(newSentence, sentences);
 
@@ -122,7 +124,15 @@ const fight = async (newMsg, combatantOne, combatantTwo) => {
 
   const winner = (combatantOne.hp <= 0) ? combatantTwo.name : combatantOne.name
 
-  newMsg.edit("The winner is " + winner + "!");
+  generateWinnerStatement(newMsg, sentences, winner);
+}
+
+const generateWinnerStatement = (newMsg, sentences, winner) => {
+  const newSentence = "The winner is " + winner + "!";
+
+  const newSentences = updateSentences(newSentence, sentences);
+
+  newMsg.edit(newSentences.join('\r\n'));
 }
 
 const decideTurn = () => {
