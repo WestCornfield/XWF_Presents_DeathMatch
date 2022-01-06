@@ -20,24 +20,98 @@ const generateCombatants = (msgContent) => {
   return [msgArr[1], msgArr[2]];
 };
 
+const selectWeapon = (damage) => {
+  if (damage > 35) {
+    return "BOMB!"
+  } else if (damage > 30) {
+    return "Honda Civic"
+  } else if (damage > 25) {
+    return "Lightning Strike"
+  } else if (damage > 20) {
+    return "Bullet from a Gun"
+  } else if (damage > 15) {
+    return "Shovel"
+  } else if (damage > 10) {
+    return "Kick"
+  } else if (damage > 5) {
+    return "Chop"
+  } else if (damage > 0) {
+    return "Punch"
+  } else if (damage === 0) {
+    return "Devastating Insult"
+  }
+}
+
+const generateFailure = (newMsg, attackerName, damage) => {
+  const newSentence = attackerName+ " trips mid-move and deals "+ -1*damage + "to themselves!";
+
+  const newSentences = updateSentences(newSentence, sentences);
+
+  newMsg.edit(newSentences.join('\r\n'));
+
+  return sentences;
+}
+
+const generateAttack = (newMsg, attackerName, victimName, damage, sentences) => {
+  const weapon = selectWeapon(damage);
+
+  const newSentence = attackerName + " hits "+ victimName + " with a "+ weapon +" for "+damage+" damage!";
+
+  const newSentences = updateSentences(newSentence, sentences);  
+
+  newMsg.edit(newSentences.join('\r\n'));
+
+  return newSentences;
+}
+
+const updateSentences = (newSentence, sentences) => {
+  sentences.push(newSentence);
+
+  if (sentences.length > 3) {
+    sentences[0] = sentences[1];
+    sentences[1] = sentences[2];
+    sentences[2] = sentences[3];
+    sentences.length = 3;
+  }
+
+  console.log(sentences);
+  
+  return sentences;
+}
+
 const fight = async (newMsg, combatantOne, combatantTwo) => {
+  let firstSentence = combatantOne.name+" and "+combatantTwo.name+" meet in the center of the ring!";
+
+  let sentences = [firstSentence];
   let playerOnesTurn = decideTurn();
 
   const firstTurnPlayer = (playerOnesTurn) ? combatantOne.name : combatantTwo.name;
 
-  newMsg.edit("The first attack goes to " + firstTurnPlayer);
+  sentences.push("The first attack goes to " + firstTurnPlayer);
+
+  newMsg.edit(sentences.join('\r\n'));
 
   while (combatantOne.hp > 0 && combatantTwo.hp > 0) {
     await delay(1000);
 
-    let damage = Math.floor(Math.random() * 30);
+    let damage = Math.floor(Math.random() * 40) - 2;
 
     if (playerOnesTurn) {
-      newMsg.edit(combatantOne.name +" hits "+combatantTwo.name+" with a right hook for " + damage + " damage!");
-      combatantTwo.hp -= damage;
+      if (damage >= 0){
+        sentences = generateAttack(newMsg, combatantOne.name, combatantTwo.name, damage, sentences);
+        combatantTwo.hp -= damage;
+      } else {
+        sentences = generateFailure(newMsg, combatantOne.name, damage, sentences);
+        combatantOne.hp += damage;
+      }
     } else {
-      newMsg.edit(combatantTwo.name+" hits "+combatantOne.name+" with a right hook for " + damage + " damage!");
-      combatantOne.hp -= damage;
+      if (damage >= 0){
+        sentences = generateAttack(newMsg, combatantTwo.name, combatantOne.name, damage, sentences);
+        combatantOne.hp -= damage;
+      } else {
+        sentences = generateFailure(newMsg, combatantTwo.name, damage, sentences);
+        combatantTwo.hp += damage;
+      }
     }
 
     console.log('combatantOne.hp = ' + combatantOne.hp)
