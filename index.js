@@ -64,7 +64,7 @@ const selectWeapon = (damage) => {
 const generateFailure = (newMsg, attackerName, damage, sentences) => {
   const selfDamage = -1*damage;
 
-  const newSentence = attackerName+ " trips mid-move and deals "+ selfDamage + " to themselves!";
+  const newSentence = "__"+attackerName+"__ trips mid-move and deals __"+ selfDamage + "__ to themselves!";
 
   const newSentences = updateSentences(newSentence, sentences);
 
@@ -81,7 +81,7 @@ const generateFailure = (newMsg, attackerName, damage, sentences) => {
 const generateAttack = (newMsg, attackerName, victimName, damage, sentences) => {
   const weapon = selectWeapon(damage);
 
-  const newSentence = attackerName + " hits "+ victimName + " with a "+ weapon +" for "+damage+" damage!";
+  const newSentence = "__"+attackerName + "__ hits __"+ victimName + "__ with a "+ weapon +" for __"+damage+"__ damage!";
 
   const newSentences = updateSentences(newSentence, sentences);
 
@@ -113,14 +113,14 @@ const updateSentences = (newSentence, sentences) => {
 }
 
 const fight = async (newMsg, combatantOne, combatantTwo) => {
-  let firstSentence = combatantOne.name+" and "+combatantTwo.name+" meet in the center of the ring!";
+  let firstSentence = "__"+combatantOne.name+"__ and __"+combatantTwo.name+"__ meet in the center of the ring!";
 
   let sentences = [firstSentence];
   let playerOnesTurn = decideTurn();
 
   const firstTurnPlayer = (playerOnesTurn) ? combatantOne.name : combatantTwo.name;
 
-  sentences.push("The first attack goes to " + firstTurnPlayer);
+  sentences.push("The first attack goes to __" + firstTurnPlayer + "__");
 
   const newEmbed = new MessageEmbed()
     .setColor(0x0099ff)
@@ -130,7 +130,7 @@ const fight = async (newMsg, combatantOne, combatantTwo) => {
   newMsg.edit({ embeds: [newEmbed] });
 
   while (combatantOne.hp > 0 && combatantTwo.hp > 0) {
-    await delay(1000);
+    await delay(2000);
 
     let damage = Math.floor(Math.random() * 40) - 2;
 
@@ -164,7 +164,7 @@ const fight = async (newMsg, combatantOne, combatantTwo) => {
 }
 
 const generateWinnerStatement = (newMsg, sentences, winner) => {
-  const newSentence = "The winner is " + winner + "!";
+  const newSentence = "The winner is __" + winner + "__!";
 
   const newSentences = updateSentences(newSentence, sentences);
 
@@ -187,7 +187,7 @@ const initiateFight = async (textChannel, combatants) => {
 
   textChannel.send({ files: [file] });
 
-  await delay(1000);
+  await delay(2000);
 
   let combatantOne = {
     name: combatants[0],
@@ -201,8 +201,8 @@ const initiateFight = async (textChannel, combatants) => {
 
   const embed = new MessageEmbed()
     .setColor(0x0099ff)
-    .setTitle('DEATHMATCH: '+combatants[0]+' vs '+combatants[1])
-    .setDescription(combatants[0]+" and "+combatants[1]+" meet in the center of the ring!");
+    .setTitle('DEATHMATCH: __'+combatants[0]+'__ vs __'+combatants[1]+'__')
+    .setDescription("__"+combatants[0]+"__ and __"+combatants[1]+"__ meet in the center of the ring!");
 
   textChannel.send({ embeds: [embed] }).then(newMsg => {
     fight(newMsg, combatantOne, combatantTwo);
