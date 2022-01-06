@@ -57,10 +57,10 @@ const startFight = (msg, combatants) => {
     let damage = Math.floor(Math.random() * 30);
 
     if (playerOnesTurn) {
-      comabatantTwo.health -= damage;
+      combatantTwo.health -= damage;
       newMessage.edit(combatants[0]+" hits "+combatants[1]+" with a right hook for " + damage + " damage!");
     } else {
-      comabatantOne.health -= damage;
+      combatantOne.health -= damage;
       newMessage.edit(combatants[0]+" hits "+combatants[1]+" with a right hook for " + damage + " damage!");
     }
 
