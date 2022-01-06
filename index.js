@@ -1,7 +1,5 @@
 const { Client, Intents, MessageAttachment, MessageEmbed, TextChannel } = require('discord.js');
 
-console.log('XWF Deathmatch running');
-
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
 const delay = (time) => {
@@ -26,9 +24,6 @@ const generateCombatants = (mentions) => {
   }));
 
   const namesArr = userArr.concat(roleArr);
-
-  console.log('namesArr');
-  console.log(namesArr);
 
   if (namesArr.length === 0) {
     return ["Jobber1", "Jobber2"];
@@ -106,8 +101,6 @@ const updateSentences = (newSentence, sentences) => {
     sentences[2] = sentences[3];
     sentences.length = 3;
   }
-
-  console.log(sentences);
   
   return sentences;
 }
@@ -151,9 +144,6 @@ const fight = async (newMsg, combatantOne, combatantTwo) => {
         combatantTwo.hp += damage;
       }
     }
-
-    console.log('combatantOne.hp = ' + combatantOne.hp)
-    console.log('combatantTwo.hp = ' + combatantTwo.hp)
 
     playerOnesTurn = !playerOnesTurn;
   }
@@ -214,11 +204,7 @@ client.on("ready", () => {
 });
 
 client.on("messageCreate", msg => {
-  console.log(msg.content);
-
   const textChannel = msg.channel;
-
-  console.log(textChannel);
   
   const content = msg.content;
   const mentions = msg.mentions;
@@ -228,9 +214,6 @@ client.on("messageCreate", msg => {
       textChannel.send("THE ACTION NEVER SLOWS DOWN! SELECT YOUR COMBATANTS AND SEND THEM TO THE RING!")
     } else {
       const combatants = generateCombatants(mentions);
-
-      console.log('mentions');
-      console.log(mentions);
 
       initiateFight(textChannel, combatants);
     }
