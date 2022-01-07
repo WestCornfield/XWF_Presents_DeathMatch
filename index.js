@@ -194,7 +194,6 @@ const dustyFinish = async (newMsg, sentences, combatants, winner, loser) => {
 }
 
 const oneLastChance = async (newMsg, sentences, combatants, winner, loser) => {
-  console.log("inside one last chance");
     const surpriseEnding = [
     "...But What's This?",
     loser.name + " has One Last Chance...",
@@ -202,9 +201,7 @@ const oneLastChance = async (newMsg, sentences, combatants, winner, loser) => {
 
   for (const sentence of surpriseEnding) {
     await delay(2000);
-    console.log(sentence);
     sentences = updateSentences(sentence, sentences);
-    console.log(sentences);
     const newEmbed = buildEmbed(sentences, combatants);
     newMsg.edit({ embeds: [newEmbed] });
   }
@@ -231,10 +228,10 @@ const oneLastChance = async (newMsg, sentences, combatants, winner, loser) => {
 const shenanigans = (newMsg, sentences, combatants, winner, loser) => {
   const outcome = Math.floor(Math.random() * 100);
 
-  if (outcome < 100) {
+  if (outcome <= 1) {
     dustyFinish(newMsg, sentences, combatants, winner, loser);
-  } else {
-    oneLastChance(newMsg, sentences, combatants, winner, loser)
+  } else if (outcome <= 10) {
+    oneLastChance(newMsg, sentences, combatants, winner, loser);
   }
 }
 
