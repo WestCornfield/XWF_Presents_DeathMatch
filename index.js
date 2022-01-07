@@ -17,25 +17,29 @@ const generateCombatants = (mentions) => {
   users.forEach((username, id) => userArr.push({
     key: id,
     name: username?.username,
-    image: username.displayAvatarURL({ format: 'jpg' })
+    image: username.displayAvatarURL({ format: 'jpg' }),
+    hp: 100
   }));
 
   roles.forEach((name, id) => roleArr.push({
     key: id,
     name: name?.name,
-    image: './assets/locked_character.jpeg'
+    image: './assets/locked_character.jpeg',
+    hp: 100
   }));
 
   jobbersArr = [
     {
       key: '1',
       name: "Jobber1",
-      image: "./assets/locked_character.jpeg"
+      image: "./assets/locked_character.jpeg",
+      hp: 100
     },
     {
       key: '2',
       name: "Jobber2",
-      image: "./assets/locked_character.jpeg"
+      image: "./assets/locked_character.jpeg",
+      hp: 100
     }
   ];
 
@@ -66,7 +70,7 @@ const selectWeapon = (damage) => {
   }
 }
 
-const generateFailure = (newMsg, attackerName, damage, sentences, combatantOne, combatantTwo) => {
+const generateFailure = (newMsg, attackerName, damage, sentences, combatants) => {
   const selfDamage = -1*damage;
 
   const newSentence = "__"+attackerName+"__ trips mid-move and deals __"+ selfDamage + "__ to themselves!";
@@ -78,8 +82,8 @@ const generateFailure = (newMsg, attackerName, damage, sentences, combatantOne, 
     .setTitle(newMsg.embeds[0].title)
     .setDescription(newSentences.join('\r\n'))
     .addFields(
-      { name: combatantOne.name, value: combatantOne.hp + "/100", inline:true },
-      { name: combatantTwo.name, value: combatantTwo.hp + "/100", inline:true }
+      { name: combatants[0].name, value: combatants[0].hp + "/100", inline:true },
+      { name: combatants[1].name, value: combatants[1].hp + "/100", inline:true }
     );
 
   newMsg.edit({ embeds: [newEmbed] });
@@ -87,7 +91,7 @@ const generateFailure = (newMsg, attackerName, damage, sentences, combatantOne, 
   return sentences;
 }
 
-const generateAttack = (newMsg, attackerName, victimName, damage, sentences, combatantOne, combatantTwo) => {
+const generateAttack = (newMsg, attackerName, victimName, damage, sentences, combatants) => {
   const weapon = selectWeapon(damage);
 
   const newSentence = "__"+attackerName + "__ hits __"+ victimName + "__ with a "+ weapon +" for __"+damage+"__ damage!";
@@ -101,8 +105,8 @@ const generateAttack = (newMsg, attackerName, victimName, damage, sentences, com
     .setTitle(newMsg.embeds[0].title)
     .setDescription(newSentences.join('\r\n'))
     .addFields(
-      { name: combatantOne.name, value: combatantOne.hp + "/100", inline:true },
-      { name: combatantTwo.name, value: combatantTwo.hp + "/100", inline:true }
+      { name: combatants[0].name, value: combatants[0].hp + "/100", inline:true },
+      { name: combatants[1].name, value: combatants[1].hp + "/100", inline:true }
     );
 
   newMsg.edit({ embeds: [newEmbed] });
@@ -123,60 +127,60 @@ const updateSentences = (newSentence, sentences) => {
   return sentences;
 }
 
-const fight = async (newMsg, combatantOne, combatantTwo) => {
-  let firstSentence = "__"+combatantOne.name+"__ and __"+combatantTwo.name+"__ meet in the center of the ring!";
+const fight = async (newMsg, combatants) => {
+  let firstSentence = "__"+combatants[0].name+"__ and __"+combatants[1].name+"__ meet in the center of the ring!";
 
   let sentences = [firstSentence];
   let playerOnesTurn = decideTurn();
 
-  const firstTurnPlayer = (playerOnesTurn) ? combatantOne.name : combatantTwo.name;
+  const firstTurnPlayer = (playerOnesTurn) ? combatants[0] : combatants[1];
 
-  sentences.push("The first attack goes to __" + firstTurnPlayer + "__");
+  sentences.push("The first attack goes to __" + firstTurnPlayer.name + "__");
 
   const newEmbed = new MessageEmbed()
     .setColor(0x0099ff)
     .setTitle(newMsg.embeds[0].title)
     .setDescription(sentences.join('\r\n'))
     .addFields(
-      { name: combatantOne.name, value: combatantOne.hp + "/100", inline:true },
-      { name: combatantTwo.name, value: combatantTwo.hp + "/100", inline:true }
+      { name: combatants[0].name, value: combatants[0].hp + "/100", inline:true },
+      { name: combatants[1].name, value: combatants[1].hp + "/100", inline:true }
     );
 
   newMsg.edit({ embeds: [newEmbed] });
 
-  while (combatantOne.hp > 0 && combatantTwo.hp > 0) {
+  while (combatants[0].hp > 0 && combatants[1].hp > 0) {
     await delay(2000);
 
     let damage = Math.floor(Math.random() * 40) - 2;
 
     if (playerOnesTurn) {
       if (damage >= 0){
-        combatantTwo.hp -= damage;
-        sentences = generateAttack(newMsg, combatantOne.name, combatantTwo.name, damage, sentences, combatantOne, combatantTwo);
+        combatants[1].hp -= damage;
+        sentences = generateAttack(newMsg, combatants[0].name, combatants[1].name, damage, sentences, combatants);
       } else {
         combatantOne.hp += damage;
-        sentences = generateFailure(newMsg, combatantOne.name, damage, sentences, combatantOne, combatantTwo);
+        sentences = generateFailure(newMsg, combatants[0].name, damage, sentences, combatants);
       }
     } else {
       if (damage >= 0){
-        combatantOne.hp -= damage;
-        sentences = generateAttack(newMsg, combatantTwo.name, combatantOne.name, damage, sentences, combatantOne, combatantTwo);
+        combatants[0].hp -= damage;
+        sentences = generateAttack(newMsg, combatants[1].name, combatants[0].name, damage, sentences, combatants);
 
       } else {
-        combatantTwo.hp += damage;
-        sentences = generateFailure(newMsg, combatantTwo.name, damage, sentences, combatantOne, combatantTwo);
+        combatants[1].hp += damage;
+        sentences = generateFailure(newMsg, combatants[1].name, damage, sentences, combatants);
       }
     }
 
     playerOnesTurn = !playerOnesTurn;
   }
 
-  const winner = (combatantOne.hp <= 0) ? combatantTwo.name : combatantOne.name
+  const winner = (combatants[0].hp <= 0) ? combatants[1].name : combatants[0].name
 
-  generateWinnerStatement(newMsg, sentences, combatantOne, combatantTwo, winner);
+  generateWinnerStatement(newMsg, sentences, combatants, winner);
 }
 
-const generateWinnerStatement = (newMsg, sentences, combatantOne, combatantTwo, winner) => {
+const generateWinnerStatement = (newMsg, sentences, combatants, winner) => {
   const newSentence = "The winner is __" + winner + "__!";
 
   const newSentences = updateSentences(newSentence, sentences);
@@ -186,8 +190,8 @@ const generateWinnerStatement = (newMsg, sentences, combatantOne, combatantTwo, 
     .setTitle(newMsg.embeds[0].title)
     .setDescription(newSentences.join('\r\n'))
     .addFields(
-      { name: combatantOne.name, value: combatantOne.hp + "/100", inline:true },
-      { name: combatantTwo.name, value: combatantTwo.hp + "/100", inline:true }
+      { name: combatants[0].name, value: combatants[0].hp + "/100", inline:true },
+      { name: combatants[1].name, value: combatants[1].hp + "/100", inline:true }
     );
 
   newMsg.edit({ embeds: [newEmbed] });
@@ -202,30 +206,17 @@ const decideTurn = () => {
 const initiateFight = async (textChannel, combatants) => {
   await delay(2000);
 
-  let combatantOne = {
-    name: combatants[0].name,
-    hp: 100
-  };
-
-  let combatantTwo = {
-    name: combatants[1].name,
-    hp: 100
-  };
-
-  console.log(combatantOne);
-  console.log(combatantTwo);
-
   const embed = new MessageEmbed()
     .setColor(0x0099ff)
-    .setTitle('DEATHMATCH: __'+combatantOne.name+'__ vs __'+combatantTwo.name+'__')
-    .setDescription("__"+combatantOne.name+"__ and __"+combatantTwo.name+"__ meet in the center of the ring!")
+    .setTitle('DEATHMATCH: __'+combatants[0].name+'__ vs __'+combatants[1].name+'__')
+    .setDescription("__"+combatants[0].name+"__ and __"+combatants[1].name+"__ meet in the center of the ring!")
     .addFields(
-      { name: combatantOne.name, value: "100/100", inline:true },
-      { name: combatantTwo.name, value: "100/100", inline:true }
+      { name: combatants[0].name, value: "100/100", inline:true },
+      { name: combatants[1].name, value: "100/100", inline:true }
     );
 
   textChannel.send({ embeds: [embed] }).then(newMsg => {
-    fight(newMsg, combatantOne, combatantTwo);
+    fight(newMsg, combatants);
   });
 };
 
