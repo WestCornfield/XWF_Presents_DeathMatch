@@ -70,45 +70,50 @@ const selectWeapon = (damage) => {
   }
 }
 
-const generateFailure = (newMsg, attackerName, damage, sentences, combatants) => {
-  const selfDamage = -1*damage;
-
-  const newSentence = "__"+attackerName+"__ trips mid-move and deals __"+ selfDamage + "__ to themselves!";
-
-  const newSentences = updateSentences(newSentence, sentences);
-
-  const newEmbed = new MessageEmbed()
+const buildEmbed = (sentences, combatants) => {
+  return new MessageEmbed()
     .setColor(0x0099ff)
-    .setTitle(newMsg.embeds[0].title)
-    .setDescription(newSentences.join('\r\n'))
+    .setTitle('DEATHMATCH: __'+combatants[0].name+'__ vs __'+combatants[1].name+'__')
+    .setDescription(sentences.join('\r\n'))
     .addFields(
       { name: combatants[0].name, value: combatants[0].hp + "/100", inline:true },
       { name: combatants[1].name, value: combatants[1].hp + "/100", inline:true }
     );
+}
 
+const generateFailure = (newMsg, playerOnesTurn, damage, sentences, combatants) => {
+  const selfDamage = -1*damage;
+
+  const attacker = (playerOnesTurn) ? combatatants[0] : combatants[1];
+
+  const newSentence = "__"+attacker.name+"__ trips mid-move and deals __"+ selfDamage + "__ to themselves!";
+
+  attacker.hp += selfDamage;
+
+  const newSentences = updateSentences(newSentence, sentences);
+
+  const newEmbed = buildEmbed(newSentences, combatants);
   newMsg.edit({ embeds: [newEmbed] });
 
   return sentences;
 }
 
-const generateAttack = (newMsg, attackerName, victimName, damage, sentences, combatants) => {
+const generateAttack = (newMsg, playerOnesTurn, damage, sentences, combatants) => {
   const weapon = selectWeapon(damage);
 
-  const newSentence = "__"+attackerName + "__ hits __"+ victimName + "__ with a "+ weapon +" for __"+damage+"__ damage!";
+  const attacker = (playerOnesTurn) ? combatants[0] : combatants[1];
+
+  const victim = (playerOnesTurn) ? combatants[1] : combatants[0];
+
+  const newSentence = "__"+attacker.name + "__ hits __"+ victim.name + "__ with a "+ weapon +" for __"+damage+"__ damage!";
+
+  victim.hp -= damage;
 
   const newSentences = updateSentences(newSentence, sentences);
 
   const file = new MessageAttachment('./assets/xwf_logo.png');
 
-  const newEmbed = new MessageEmbed()
-    .setColor(0x0099ff)
-    .setTitle(newMsg.embeds[0].title)
-    .setDescription(newSentences.join('\r\n'))
-    .addFields(
-      { name: combatants[0].name, value: combatants[0].hp + "/100", inline:true },
-      { name: combatants[1].name, value: combatants[1].hp + "/100", inline:true }
-    );
-
+  const newEmbed = buildEmbed(newSentences, combatants);
   newMsg.edit({ embeds: [newEmbed] });
 
   return newSentences;
@@ -137,15 +142,7 @@ const fight = async (newMsg, combatants) => {
 
   sentences.push("The first attack goes to __" + firstTurnPlayer.name + "__");
 
-  const newEmbed = new MessageEmbed()
-    .setColor(0x0099ff)
-    .setTitle(newMsg.embeds[0].title)
-    .setDescription(sentences.join('\r\n'))
-    .addFields(
-      { name: combatants[0].name, value: combatants[0].hp + "/100", inline:true },
-      { name: combatants[1].name, value: combatants[1].hp + "/100", inline:true }
-    );
-
+  const newEmbed = buildEmbed(sentences, combatants);
   newMsg.edit({ embeds: [newEmbed] });
 
   while (combatants[0].hp > 0 && combatants[1].hp > 0) {
@@ -153,24 +150,7 @@ const fight = async (newMsg, combatants) => {
 
     let damage = Math.floor(Math.random() * 40) - 2;
 
-    if (playerOnesTurn) {
-      if (damage >= 0){
-        combatants[1].hp -= damage;
-        sentences = generateAttack(newMsg, combatants[0].name, combatants[1].name, damage, sentences, combatants);
-      } else {
-        combatantOne.hp += damage;
-        sentences = generateFailure(newMsg, combatants[0].name, damage, sentences, combatants);
-      }
-    } else {
-      if (damage >= 0){
-        combatants[0].hp -= damage;
-        sentences = generateAttack(newMsg, combatants[1].name, combatants[0].name, damage, sentences, combatants);
-
-      } else {
-        combatants[1].hp += damage;
-        sentences = generateFailure(newMsg, combatants[1].name, damage, sentences, combatants);
-      }
-    }
+    sentences = (damage >= 0) ? generateAttack(newMsg, playerOnesTurn, damage, sentences, combatants) : generateFailure(newMsg, playerOnesTurn, damage, sentences, combatants);
 
     playerOnesTurn = !playerOnesTurn;
   }
@@ -185,15 +165,7 @@ const generateWinnerStatement = (newMsg, sentences, combatants, winner) => {
 
   const newSentences = updateSentences(newSentence, sentences);
 
-  const newEmbed = new MessageEmbed()
-    .setColor(0x0099ff)
-    .setTitle(newMsg.embeds[0].title)
-    .setDescription(newSentences.join('\r\n'))
-    .addFields(
-      { name: combatants[0].name, value: combatants[0].hp + "/100", inline:true },
-      { name: combatants[1].name, value: combatants[1].hp + "/100", inline:true }
-    );
-
+  const newEmbed = buildEmbed(newSentences, combatants);
   newMsg.edit({ embeds: [newEmbed] });
 }
 
@@ -206,14 +178,9 @@ const decideTurn = () => {
 const initiateFight = async (textChannel, combatants) => {
   await delay(2000);
 
-  const embed = new MessageEmbed()
-    .setColor(0x0099ff)
-    .setTitle('DEATHMATCH: __'+combatants[0].name+'__ vs __'+combatants[1].name+'__')
-    .setDescription("__"+combatants[0].name+"__ and __"+combatants[1].name+"__ meet in the center of the ring!")
-    .addFields(
-      { name: combatants[0].name, value: "100/100", inline:true },
-      { name: combatants[1].name, value: "100/100", inline:true }
-    );
+  const sentences = ["__"+combatants[0].name+"__ and __"+combatants[1].name+"__ meet in the center of the ring!"]
+
+  const embed = buildEmbed(sentences, combatants);
 
   textChannel.send({ embeds: [embed] }).then(newMsg => {
     fight(newMsg, combatants);
@@ -232,7 +199,6 @@ const generateFightScreen = async (combatants) => {
   const avatarTwo = await loadImage(combatants[1].image);
 
   ctx.drawImage(avatarOne, 25, 150, 100, 100);
-
   ctx.drawImage(avatarTwo, 175, 150, 100, 100);
 
   const attachment = new MessageAttachment(canvas.toBuffer());
