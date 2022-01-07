@@ -7,7 +7,7 @@ const delay = (time) => {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 
-const generateCombatants = (mentions) => {
+const generateCombatants = (mentions, author) => {
   const users = mentions.users;
   const roles = mentions.roles;
 
@@ -28,22 +28,23 @@ const generateCombatants = (mentions) => {
     hp: 100
   }));
 
+  const authorArr = [{
+    key: author.id,
+    name: author.username,
+    image: author.displayAvatarURL({ format: 'jpg' }),
+    hp: 100
+  }];
+
   jobbersArr = [
     {
       key: '1',
       name: "Jobber1",
       image: "./assets/locked_character.jpeg",
       hp: 100
-    },
-    {
-      key: '2',
-      name: "Jobber2",
-      image: "./assets/locked_character.jpeg",
-      hp: 100
     }
   ];
 
-  const combatantsArr = userArr.concat(roleArr).concat(jobbersArr);
+  const combatantsArr = userArr.concat(roleArr).concat(authorArr).concat(jobbersArr);
 
   return [combatantsArr[0], combatantsArr[1]];
 };
@@ -294,12 +295,13 @@ client.on("messageCreate", async msg => {
 
   const content = msg.content;
   const mentions = msg.mentions;
+  const author = msg.author;
 
   if (content.includes("--xwf-deathmatch")) {
     if (content.includes("--help")) {
       textChannel.send("THE ACTION NEVER SLOWS DOWN! SELECT YOUR COMBATANTS AND SEND THEM TO THE RING!")
     } else {
-      const combatants = generateCombatants(mentions);
+      const combatants = generateCombatants(mentions, author);
 
       const attachment = await generateFightScreen(combatants);
 
