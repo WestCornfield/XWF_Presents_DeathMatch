@@ -70,9 +70,9 @@ const selectWeapon = (damage) => {
   }
 }
 
-const buildEmbed = (sentences, combatants) => {
+const buildEmbed = (color, sentences, combatants) => {
   return new MessageEmbed()
-    .setColor(0x0099ff)
+    .setColor(color)
     .setTitle('DEATHMATCH: __'+combatants[0].name+'__ vs __'+combatants[1].name+'__')
     .setDescription(sentences.join('\r\n'))
     .addFields(
@@ -86,14 +86,14 @@ const generateFailure = (newMsg, playerOnesTurn, damage, sentences, combatants) 
 
   const attacker = (playerOnesTurn) ? combatants[0] : combatants[1];
 
-  const newSentence = "__"+attacker.name+"__ trips mid-move and deals __"+ selfDamage + "__ to themselves!";
+  const newSentence = "💣 __"+attacker.name+"__ trips mid-move and deals __"+ selfDamage + "__ to themselves!";
 
   attacker.hp -= selfDamage;
 
   const newSentences = updateSentences(newSentence, sentences);
 
-  const newEmbed = buildEmbed(newSentences, combatants);
-  newMsg.edit({ embeds: [newEmbed] });
+  const embed = buildEmbed(0x000000, newSentences, combatants);
+  newMsg.edit({ embeds: [embed] });
 
   return sentences;
 }
@@ -105,7 +105,11 @@ const generateAttack = (newMsg, playerOnesTurn, damage, sentences, combatants) =
 
   const victim = (playerOnesTurn) ? combatants[1] : combatants[0];
 
-  const newSentence = "__"+attacker.name + "__ hits __"+ victim.name + "__ with a "+ weapon +" for __"+damage+"__ damage!";
+  const direction = (playerOnesTurn) ? "👉" : "👈";
+
+  const color = (playerOnesTurn) ? 0x00ff00 : 0xff0000;
+
+  const newSentence = direction+" __"+attacker.name + "__ hits __"+ victim.name + "__ with a "+ weapon +" for __"+damage+"__ damage!";
 
   victim.hp -= damage;
 
@@ -113,8 +117,8 @@ const generateAttack = (newMsg, playerOnesTurn, damage, sentences, combatants) =
 
   const file = new MessageAttachment('./assets/xwf_logo.png');
 
-  const newEmbed = buildEmbed(newSentences, combatants);
-  newMsg.edit({ embeds: [newEmbed] });
+  const embed = buildEmbed(color, newSentences, combatants);
+  newMsg.edit({ embeds: [embed] });
 
   return newSentences;
 }
@@ -142,8 +146,8 @@ const fight = async (newMsg, combatants) => {
 
   sentences.push("The first attack goes to __" + firstTurnPlayer.name + "__");
 
-  const newEmbed = buildEmbed(sentences, combatants);
-  newMsg.edit({ embeds: [newEmbed] });
+  const embed = buildEmbed(0x0099ff, sentences, combatants);
+  newMsg.edit({ embeds: [embed] });
 
   while (combatants[0].hp > 0 && combatants[1].hp > 0) {
     await delay(2000);
@@ -188,8 +192,8 @@ const dustyFinish = async (newMsg, sentences, combatants, winner, loser) => {
   for (const sentence of surpriseEnding) {
     await delay(2000);
     const newSentences = updateSentences(sentence, sentences);
-    const newEmbed = buildEmbed(newSentences, combatants);
-    newMsg.edit({ embeds: [newEmbed] });
+    const embed = buildEmbed(0x800080, newSentences, combatants);
+    newMsg.edit({ embeds: [embed] });
   }
 }
 
@@ -202,8 +206,8 @@ const oneLastChance = async (newMsg, sentences, combatants, winner, loser) => {
   for (const sentence of surpriseEnding) {
     await delay(2000);
     sentences = updateSentences(sentence, sentences);
-    const newEmbed = buildEmbed(sentences, combatants);
-    newMsg.edit({ embeds: [newEmbed] });
+    const embed = buildEmbed(0x800080, sentences, combatants);
+    newMsg.edit({ embeds: [embed] });
   }
 
   await delay(3000);
@@ -221,8 +225,8 @@ const oneLastChance = async (newMsg, sentences, combatants, winner, loser) => {
   }
 
   sentences = updateSentences(lastSentence, sentences);
-  const newEmbed = buildEmbed(sentences, combatants);
-  newMsg.edit({ embeds: [newEmbed] });
+  const embed = buildEmbed(0xffffff, sentences, combatants);
+  newMsg.edit({ embeds: [embed] });
 }
 
 const shenanigans = (newMsg, sentences, combatants, winner, loser) => {
@@ -240,8 +244,8 @@ const generateWinnerStatement = (newMsg, sentences, combatants, winner) => {
 
   const newSentences = updateSentences(newSentence, sentences);
 
-  const newEmbed = buildEmbed(newSentences, combatants);
-  newMsg.edit({ embeds: [newEmbed] });
+  const embed = buildEmbed(0xffffff, newSentences, combatants);
+  newMsg.edit({ embeds: [embed] });
 }
 
 const decideTurn = () => {
@@ -255,7 +259,7 @@ const initiateFight = async (textChannel, combatants) => {
 
   const sentences = ["__"+combatants[0].name+"__ and __"+combatants[1].name+"__ meet in the center of the ring!"]
 
-  const embed = buildEmbed(sentences, combatants);
+  const embed = buildEmbed(0x0099ff, sentences, combatants);
 
   textChannel.send({ embeds: [embed] }).then(newMsg => {
     fight(newMsg, combatants);
