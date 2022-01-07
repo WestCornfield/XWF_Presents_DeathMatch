@@ -11,29 +11,21 @@ I have no idea how long this project will take. This is my second discord bot. B
 
 I will make the link to add the bot publicly available once we've got at least basic deathmatch functional.
 
-PROGRESS BAR FOR BETA RELEASE - BETA FEATURE COMPLETE (Undergoing testing before opening beta):
-BASIC BOT IS UP AND RUNNING - COMPLETE
-HELP COMMAND - COMPLETE
-FIRST SUCCESSFUL DEATHMATCH - COMPLETE
-GENERATE COMBATANTS - COMPLETE
-SIMPLIFYING BATTLE TO ONE MESSAGE - COMPLETE
-MAKE FIGHT WATCHABLE WITH TIME DELAY - COMPLETE
-ADD UNIQUE WEAPONS - COMPLETE
-ADD CRITICAL FAILURES - COMPLETE
-USE LAST THREE MESSAGES - COMPLETE
-CREATE COMBAT FRAME - COMPLETE
-BASIC DEATHMATCH - COMPLETE
-NEW ATTACKS - COMPLETE
-DECIDE WHO GETS FIRST MOVE - COMPLETE
-ADD FOOTER HEALTHBARS - COMPLETE
-ADD ICONS (maybe) AND CHANGE COLOR PER ATTACK - COMPLETE
-CREATE COOL DEATHMATCH IMAGE - COMPLETE enough
-READ USER PROFILE IMAGES - COMPLETE
-DUSTY FINISH - COMPLETE
-POSSIBLE DRAW - COMPLETE
-CODE CLEANUP - COMPLETE
+How To Invite Our Discord Bot to your server:
+https://discord.com/api/oauth2/authorize?client_id=928688773225656400&permissions=429497117760&scope=bot
 
-PROGRESS BAR FOR V1 RELEASE:
+Example on Usage:
+Once the bot has been invited, any user in the discord server can type:
+
+```--xwf-deathmatch @User1 @User2```
+
+And the deathmatch will commence!
+
+If you don't have tag a second user, your first user will fight a jobber. If you don't tag any users, you're sending two jobbers into the death pit.
+
+PROGRESS BAR FOR V2 RELEASE:
+USE MESSAGE AUTHOR IN FIGHTER CHAIN - 0%
+USE RANDOM SERVER COMBATANT IF NO COMBATANTS - 0%
 FOOT ON THE ROPE - 0%
 ADD NEAT LITTLE NAMEPLATES FOR DEATHMATCH - 0%
 ADD CRITICAL HIT FUNCTIONALITY - 0%
