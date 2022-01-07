@@ -16,23 +16,32 @@ const generateCombatants = (mentions) => {
 
   users.forEach((username, id) => userArr.push({
     key: id,
-    value: username?.username
+    name: username?.username,
+    image: username.displayAvatarURL({ format: 'jpg' })
   }));
 
   roles.forEach((name, id) => roleArr.push({
     key: id,
-    value: name?.name
+    name: name?.name,
+    image: './assets/locked_character.jpeg'
   }));
 
-  const namesArr = userArr.concat(roleArr);
+  jobbersArr = [
+    {
+      key: '1',
+      name: "Jobber1",
+      image: "./assets/locked_character.jpeg"
+    },
+    {
+      key: '2',
+      name: "Jobber2",
+      image: "./assets/locked_character.jpeg"
+    }
+  ];
 
-  if (namesArr.length === 0) {
-    return ["Jobber1", "Jobber2"];
-  } else if (namesArr.length === 1) {
-    return [namesArr[0].value, "Jobber"];
-  }
+  const combatantsArr = userArr.concat(roleArr).concat(jobbersArr);
 
-  return [namesArr[0].value, namesArr[1].value];
+  return [combatantsArr[0], combatantsArr[1]];
 };
 
 const selectWeapon = (damage) => {
@@ -194,22 +203,25 @@ const initiateFight = async (textChannel, combatants) => {
   await delay(2000);
 
   let combatantOne = {
-    name: combatants[0],
+    name: combatants[0].name,
     hp: 100
   };
 
   let combatantTwo = {
-    name: combatants[1],
+    name: combatants[1].name,
     hp: 100
   };
 
+  console.log(combatantOne);
+  console.log(combatantTwo);
+
   const embed = new MessageEmbed()
     .setColor(0x0099ff)
-    .setTitle('DEATHMATCH: __'+combatants[0]+'__ vs __'+combatants[1]+'__')
-    .setDescription("__"+combatants[0]+"__ and __"+combatants[1]+"__ meet in the center of the ring!")
+    .setTitle('DEATHMATCH: __'+combatantOne.name+'__ vs __'+combatantTwo.name+'__')
+    .setDescription("__"+combatantOne.name+"__ and __"+combatantTwo.name+"__ meet in the center of the ring!")
     .addFields(
-      { name: combatants[0], value: "100/100", inline:true },
-      { name: combatants[1], value: "100/100", inline:true }
+      { name: combatantOne.name, value: "100/100", inline:true },
+      { name: combatantTwo.name, value: "100/100", inline:true }
     );
 
   textChannel.send({ embeds: [embed] }).then(newMsg => {
@@ -217,33 +229,7 @@ const initiateFight = async (textChannel, combatants) => {
   });
 };
 
-const generateFightScreen = async (mentions) => {
-  const users = mentions.users;
-  const roles = mentions.roles;
-
-  console.log('users');
-  console.log(users);
-
-  console.log('roles');
-  console.log(roles);
-
-  const userArr = [];
-  const roleArr = [];
-
-  users.forEach((username, id) => userArr.push({
-    key: id,
-    value: username,
-    image: username.displayAvatarURL({ format: 'jpg' })
-  }));
-
-  roles.forEach((name, id) => roleArr.push({
-    key: id,
-    value: name,
-    image: './assets/locked_character.jpeg'
-  }));
-
-  const namesArr = userArr.concat(roleArr);
-
+const generateFightScreen = async (combatants) => {
   const canvas = createCanvas(300, 320);
   const ctx = canvas.getContext('2d');
 
@@ -251,8 +237,8 @@ const generateFightScreen = async (mentions) => {
 
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-  const avatarOne = await loadImage(namesArr[0].image);
-  const avatarTwo = await loadImage(namesArr[1].image);
+  const avatarOne = await loadImage(combatants[0].image);
+  const avatarTwo = await loadImage(combatants[1].image);
 
   ctx.drawImage(avatarOne, 25, 150, 100, 100);
 
@@ -277,11 +263,11 @@ client.on("messageCreate", async msg => {
     if (content.includes("--help")) {
       textChannel.send("THE ACTION NEVER SLOWS DOWN! SELECT YOUR COMBATANTS AND SEND THEM TO THE RING!")
     } else {
-      const attachment = await generateFightScreen(mentions);
+      const combatants = generateCombatants(mentions);
+
+      const attachment = await generateFightScreen(combatants);
 
       textChannel.send({ files: [attachment] });
-
-      const combatants = generateCombatants(mentions);
 
       initiateFight(textChannel, combatants);
     }
