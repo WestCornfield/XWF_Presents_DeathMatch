@@ -84,11 +84,11 @@ const buildEmbed = (sentences, combatants) => {
 const generateFailure = (newMsg, playerOnesTurn, damage, sentences, combatants) => {
   const selfDamage = -1*damage;
 
-  const attacker = (playerOnesTurn) ? combatatants[0] : combatants[1];
+  const attacker = (playerOnesTurn) ? combatants[0] : combatants[1];
 
   const newSentence = "__"+attacker.name+"__ trips mid-move and deals __"+ selfDamage + "__ to themselves!";
 
-  attacker.hp += selfDamage;
+  attacker.hp -= selfDamage;
 
   const newSentences = updateSentences(newSentence, sentences);
 
@@ -155,13 +155,91 @@ const fight = async (newMsg, combatants) => {
     playerOnesTurn = !playerOnesTurn;
   }
 
-  const winner = (combatants[0].hp <= 0) ? combatants[1].name : combatants[0].name
+  const winner = (combatants[0].hp <= 0) ? combatants[1] : combatants[0];
+
+  const loser = (combatants[0].hp <= 0) ? combatants[0] : combatants[1];
 
   generateWinnerStatement(newMsg, sentences, combatants, winner);
+
+  shenanigans(newMsg, sentences, combatants, winner, loser);
+}
+
+const generateReason = () => {
+  const outcome = Math.floor(Math.random() * 4);
+
+  if (outcome === 0) {
+    return "being smelly";
+  } else if (outcome === 1) {
+    return "poor sportsmanship";
+  } else if (outcome === 2) {
+    return "no good reason";
+  } else if (outcome === 3) {
+    return "attire that violates Deathmatch regulations";
+  }
+}
+
+const dustyFinish = async (newMsg, sentences, combatants, winner, loser) => {
+  const surpriseEnding = [
+    "...But What's This?",
+    "The Official Is Disqualifying "+winner.name+" for "+ generateReason() +"!",
+    "The actual winner is "+loser.name+"!"
+  ]
+
+  for (const sentence of surpriseEnding) {
+    await delay(2000);
+    const newSentences = updateSentences(sentence, sentences);
+    const newEmbed = buildEmbed(newSentences, combatants);
+    newMsg.edit({ embeds: [newEmbed] });
+  }
+}
+
+const oneLastChance = async (newMsg, sentences, combatants, winner, loser) => {
+  console.log("inside one last chance");
+    const surpriseEnding = [
+    "...But What's This?",
+    loser.name + " has One Last Chance...",
+  ];
+
+  for (const sentence of surpriseEnding) {
+    await delay(2000);
+    console.log(sentence);
+    sentences = updateSentences(sentence, sentences);
+    console.log(sentences);
+    const newEmbed = buildEmbed(sentences, combatants);
+    newMsg.edit({ embeds: [newEmbed] });
+  }
+
+  await delay(3000);
+
+  let damage = Math.floor(Math.random() * 40);
+
+  sentences = generateAttack(newMsg, (winner === combatants[1]), damage, sentences, combatants);
+
+  let lastSentence = "";
+
+  if (winner.hp <= 0) {
+    lastSentence = "INCREDIBLE! BOTH COMPETITORS ARE DOWN! THE MATCH IS A DRAW!";
+  } else {
+    lastSentence = "BUT IT'S NOT ENOUGH! The Winner is still "+winner.name;
+  }
+
+  sentences = updateSentences(lastSentence, sentences);
+  const newEmbed = buildEmbed(sentences, combatants);
+  newMsg.edit({ embeds: [newEmbed] });
+}
+
+const shenanigans = (newMsg, sentences, combatants, winner, loser) => {
+  const outcome = Math.floor(Math.random() * 100);
+
+  if (outcome < 100) {
+    dustyFinish(newMsg, sentences, combatants, winner, loser);
+  } else {
+    oneLastChance(newMsg, sentences, combatants, winner, loser)
+  }
 }
 
 const generateWinnerStatement = (newMsg, sentences, combatants, winner) => {
-  const newSentence = "The winner is __" + winner + "__!";
+  const newSentence = "The winner is __" + winner.name + "__!";
 
   const newSentences = updateSentences(newSentence, sentences);
 
