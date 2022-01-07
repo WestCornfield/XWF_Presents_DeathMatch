@@ -1,4 +1,5 @@
-const { Client, Intents, MessageAttachment, MessageEmbed, TextChannel } = require('discord.js');
+const { Attachment, Client, Intents, MessageAttachment, MessageEmbed,MessagePayload, TextChannel } = require('discord.js');
+const { createCanvas, loadImage } = require('canvas');
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
@@ -12,7 +13,7 @@ const generateCombatants = (mentions) => {
 
   const userArr = [];
   const roleArr = [];
-  
+
   users.forEach((username, id) => userArr.push({
     key: id,
     value: username?.username
@@ -70,7 +71,7 @@ const generateFailure = (newMsg, attackerName, damage, sentences, combatantOne, 
     .addFields(
       { name: combatantOne.name, value: combatantOne.hp + "/100", inline:true },
       { name: combatantTwo.name, value: combatantTwo.hp + "/100", inline:true }
-    );   
+    );
 
   newMsg.edit({ embeds: [newEmbed] });
 
@@ -93,7 +94,7 @@ const generateAttack = (newMsg, attackerName, victimName, damage, sentences, com
     .addFields(
       { name: combatantOne.name, value: combatantOne.hp + "/100", inline:true },
       { name: combatantTwo.name, value: combatantTwo.hp + "/100", inline:true }
-    );  
+    );
 
   newMsg.edit({ embeds: [newEmbed] });
 
@@ -109,7 +110,7 @@ const updateSentences = (newSentence, sentences) => {
     sentences[2] = sentences[3];
     sentences.length = 3;
   }
-  
+
   return sentences;
 }
 
@@ -130,7 +131,7 @@ const fight = async (newMsg, combatantOne, combatantTwo) => {
     .addFields(
       { name: combatantOne.name, value: combatantOne.hp + "/100", inline:true },
       { name: combatantTwo.name, value: combatantTwo.hp + "/100", inline:true }
-    );  
+    );
 
   newMsg.edit({ embeds: [newEmbed] });
 
@@ -151,10 +152,10 @@ const fight = async (newMsg, combatantOne, combatantTwo) => {
       if (damage >= 0){
         combatantOne.hp -= damage;
         sentences = generateAttack(newMsg, combatantTwo.name, combatantOne.name, damage, sentences, combatantOne, combatantTwo);
-        
+
       } else {
         combatantTwo.hp += damage;
-        sentences = generateFailure(newMsg, combatantTwo.name, damage, sentences, combatantOne, combatantTwo);        
+        sentences = generateFailure(newMsg, combatantTwo.name, damage, sentences, combatantOne, combatantTwo);
       }
     }
 
@@ -178,7 +179,7 @@ const generateWinnerStatement = (newMsg, sentences, combatantOne, combatantTwo, 
     .addFields(
       { name: combatantOne.name, value: combatantOne.hp + "/100", inline:true },
       { name: combatantTwo.name, value: combatantTwo.hp + "/100", inline:true }
-    );  
+    );
 
   newMsg.edit({ embeds: [newEmbed] });
 }
@@ -190,10 +191,6 @@ const decideTurn = () => {
 }
 
 const initiateFight = async (textChannel, combatants) => {
-  const file = new MessageAttachment('./assets/xwf_logo.png');
-
-  textChannel.send({ files: [file] });
-
   await delay(2000);
 
   let combatantOne = {
@@ -220,13 +217,59 @@ const initiateFight = async (textChannel, combatants) => {
   });
 };
 
+const generateFightScreen = async (mentions) => {
+  const users = mentions.users;
+  const roles = mentions.roles;
+
+  console.log('users');
+  console.log(users);
+
+  console.log('roles');
+  console.log(roles);
+
+  const userArr = [];
+  const roleArr = [];
+
+  users.forEach((username, id) => userArr.push({
+    key: id,
+    value: username,
+    image: username.displayAvatarURL({ format: 'jpg' })
+  }));
+
+  roles.forEach((name, id) => roleArr.push({
+    key: id,
+    value: name,
+    image: './assets/locked_character.jpeg'
+  }));
+
+  const namesArr = userArr.concat(roleArr);
+
+  const canvas = createCanvas(300, 320);
+  const ctx = canvas.getContext('2d');
+
+  const background = await loadImage('./assets/xwf_deathmatch_screen.png');
+
+  ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+  const avatarOne = await loadImage(namesArr[0].image);
+  const avatarTwo = await loadImage(namesArr[1].image);
+
+  ctx.drawImage(avatarOne, 25, 150, 100, 100);
+
+  ctx.drawImage(avatarTwo, 175, 150, 100, 100);
+
+  const attachment = new MessageAttachment(canvas.toBuffer());
+
+  return attachment;
+}
+
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`)
 });
 
-client.on("messageCreate", msg => {
+client.on("messageCreate", async msg => {
   const textChannel = msg.channel;
-  
+
   const content = msg.content;
   const mentions = msg.mentions;
 
@@ -234,6 +277,10 @@ client.on("messageCreate", msg => {
     if (content.includes("--help")) {
       textChannel.send("THE ACTION NEVER SLOWS DOWN! SELECT YOUR COMBATANTS AND SEND THEM TO THE RING!")
     } else {
+      const attachment = await generateFightScreen(mentions);
+
+      textChannel.send({ files: [attachment] });
+
       const combatants = generateCombatants(mentions);
 
       initiateFight(textChannel, combatants);
