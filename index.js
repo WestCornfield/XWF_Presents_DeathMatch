@@ -89,7 +89,7 @@ const generateFailure = (newMsg, playerOnesTurn, damage, sentences, combatants) 
 
   const newSentence = "💣 __"+attacker.name+"__ trips mid-move and deals __"+ selfDamage + "__ to themselves!";
 
-  attacker.hp -= selfDamage;
+  attacker.hp = (attacker.hp <= selfDamage) ? 0 : (attacker.hp - selfDamage);
 
   const newSentences = updateSentences(newSentence, sentences);
 
@@ -112,7 +112,7 @@ const generateAttack = (newMsg, playerOnesTurn, damage, sentences, combatants) =
 
   const newSentence = direction+" __"+attacker.name + "__ hits __"+ victim.name + "__ with a "+ weapon +" for __"+damage+"__ damage!";
 
-  victim.hp -= damage;
+  victim.hp = (victim.hp <= damage) ? 0 : (victim.hp - damage);
 
   const newSentences = updateSentences(newSentence, sentences);
 
