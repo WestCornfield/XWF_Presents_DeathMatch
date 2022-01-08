@@ -23,6 +23,10 @@ And the deathmatch will commence!
 
 If you don't have tag a second user, your first user will fight a jobber. If you don't tag any users, you're sending two jobbers into the death pit.
 
+PROGRESS BAR FOR V1 RELEASE (changes from beta):
+Add Damage Table - 0%
+Sub out selectWeapon for generateAttackText - 0%
+
 PROGRESS BAR FOR V2 RELEASE:
 USE MESSAGE AUTHOR IN FIGHTER CHAIN - 0%
 USE RANDOM SERVER COMBATANT IF NO COMBATANTS - 0%
