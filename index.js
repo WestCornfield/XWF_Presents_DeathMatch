@@ -171,8 +171,8 @@ const generateReason = () => {
 const dustyFinish = async (newMsg, sentences, combatants, winner, loser) => {
   const surpriseEnding = [
     "...But What's This?",
-    "The Official Is Disqualifying "+winner.name+" for "+ generateReason() +"!",
-    "The actual winner is "+loser.name+"!"
+    "The Official Is Disqualifying __"+winner.name+"__ for "+ generateReason() +"!",
+    "The actual winner is __"+loser.name+"__!"
   ]
 
   for (const sentence of surpriseEnding) {

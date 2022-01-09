@@ -14,9 +14,9 @@ class AttackHandler {
       return Math.floor(Math.random() * 5) - 5;
     } else if (diceRoll <= 9) {
       return 0;
-    } else if (diceRoll <= 69) {
+    } else if (diceRoll <= 49) {
       return Math.floor(Math.random() * 5) + 1;
-    } else if (diceRoll <= 119) {
+    } else if (diceRoll <= 109) {
       return Math.floor(Math.random() * 5) + 6;
     } else if (diceRoll <= 159) {
       return Math.floor(Math.random() * 5) + 11;

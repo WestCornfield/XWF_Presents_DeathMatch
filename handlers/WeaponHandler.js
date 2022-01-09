@@ -7,7 +7,7 @@ class WeaponHandler {
     if (damage === 0) {
       const meanName = this.generateInsult();
 
-      return direction+" __"+attacker.name + "__ calls __"+ victim.name + "__ a "+ meanName +" for __0__ physical damage... but indescribable emotional damage!";
+      return direction+" __"+attacker.name + "__ calls __"+ victim.name + "__ "+ meanName +" for __0__ physical damage... but indescribable emotional damage!";
     } else if (damage <= 5) {
       return direction+" __"+attacker.name + "__ punches __"+ victim.name + "__ in the face for __"+damage+"__ damage!";
     } else if (damage <= 10) {
@@ -42,7 +42,7 @@ class WeaponHandler {
   generateInsult() {
     let insult = Math.floor(Math.random() * 5);
 
-    let insults = ["Spoony Bard", "No Good Bastard", "Stinky Cheater", "Underwhelming Writer", "Stupid Idiot"];
+    let insults = ["a Spoony Bard", "a No Good Bastard", "a Stinky Cheater", "an Underwhelming Writer", "a Stupid Idiot"];
 
     return insults[insult];
   }
