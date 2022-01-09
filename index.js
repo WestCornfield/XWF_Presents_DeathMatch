@@ -1,5 +1,7 @@
 const { Attachment, Client, Intents, MessageAttachment, MessageEmbed,MessagePayload, TextChannel } = require('discord.js');
 const { createCanvas, loadImage } = require('canvas');
+const { AttackHandler } = require('./handlers/AttackHandler');
+const { WeaponHandler } = require('./handlers/WeaponHandler');
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
@@ -49,28 +51,6 @@ const generateCombatants = (mentions, author) => {
   return [combatantsArr[0], combatantsArr[1]];
 };
 
-const selectWeapon = (damage) => {
-  if (damage > 35) {
-    return "BOMB"
-  } else if (damage > 30) {
-    return "Honda Civic"
-  } else if (damage > 25) {
-    return "Lightning Strike"
-  } else if (damage > 20) {
-    return "Bullet... from a Gun"
-  } else if (damage > 15) {
-    return "Shovel"
-  } else if (damage > 10) {
-    return "Kick"
-  } else if (damage > 5) {
-    return "Chop"
-  } else if (damage > 0) {
-    return "Punch"
-  } else if (damage === 0) {
-    return "Devastating Insult"
-  }
-}
-
 const buildEmbed = (color, sentences, combatants) => {
   return new MessageEmbed()
     .setColor(color)
@@ -100,7 +80,7 @@ const generateFailure = (newMsg, playerOnesTurn, damage, sentences, combatants) 
 }
 
 const generateAttack = (newMsg, playerOnesTurn, damage, sentences, combatants) => {
-  const weapon = selectWeapon(damage);
+  const weaponHandler = new WeaponHandler();
 
   const attacker = (playerOnesTurn) ? combatants[0] : combatants[1];
 
@@ -110,7 +90,7 @@ const generateAttack = (newMsg, playerOnesTurn, damage, sentences, combatants) =
 
   const color = (playerOnesTurn) ? 0x00ff00 : 0xff0000;
 
-  const newSentence = direction+" __"+attacker.name + "__ hits __"+ victim.name + "__ with a "+ weapon +" for __"+damage+"__ damage!";
+  const newSentence = weaponHandler.generateAttackText(attacker, victim, damage, direction);
 
   victim.hp = (victim.hp <= damage) ? 0 : (victim.hp - damage);
 
@@ -153,7 +133,8 @@ const fight = async (newMsg, combatants) => {
   while (combatants[0].hp > 0 && combatants[1].hp > 0) {
     await delay(2000);
 
-    let damage = Math.floor(Math.random() * 40) - 2;
+    let attackHandler = new AttackHandler();
+    let damage = attackHandler.rollDamage();
 
     sentences = (damage >= 0) ? generateAttack(newMsg, playerOnesTurn, damage, sentences, combatants) : generateFailure(newMsg, playerOnesTurn, damage, sentences, combatants);
 
@@ -167,6 +148,10 @@ const fight = async (newMsg, combatants) => {
   generateWinnerStatement(newMsg, sentences, combatants, winner);
 
   shenanigans(newMsg, sentences, combatants, winner, loser);
+}
+
+const rollDamage = () => {
+  return Math.floor(Math.random() * 40) - 2;
 }
 
 const generateReason = () => {
@@ -222,7 +207,7 @@ const oneLastChance = async (newMsg, sentences, combatants, winner, loser) => {
   if (winner.hp <= 0) {
     lastSentence = "INCREDIBLE! BOTH COMPETITORS ARE DOWN! THE MATCH IS A DRAW!";
   } else {
-    lastSentence = "BUT IT'S NOT ENOUGH! The Winner is still "+winner.name;
+    lastSentence = "BUT IT'S NOT ENOUGH! The Winner is still __"+winner.name+"__";
   }
 
   sentences = updateSentences(lastSentence, sentences);
