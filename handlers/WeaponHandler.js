@@ -27,8 +27,19 @@ class WeaponHandler {
     } else if (damage <= 40) {
       return direction+" __"+attacker.name + "__ lights the fuse on a bomb and tosses it at __"+ victim.name + "__ ! IT EXPLODES... dealing __"+damage+"__ damage!";
     } else {
-      return direction+" __"+attacker.name + "__ sticks out one finger into __"+ victim.name + "__'s chest... FINGERPOKE OF DOOM! __"+damage+"__ damage!";
+      return this.generateSuperMove(direction, attacker, victim, damage);
     }
+  }
+
+  generateSuperMove(direction, attacker, victim, damage) {
+    let outcome = Math.floor(Math.random() * 2);
+
+    let outcomes = [direction+" __"+attacker.name + "__ sticks out one finger into __"+ victim.name + "__'s chest... FINGERPOKE OF DOOM! __"+damage+"__ damage!",
+    direction+" __"+attacker.name + "__'s fist shakes, enraged at __" + victim.name +"__! 'I TOLD YOU NOT TO TOUCH IT!' WHAM! ARTHUR PUNCH! __"+damage+"__ damage!",
+    direction+" __"+attacker.name + "__ SLAMS __"+ victim.name + " on the ring apron! THAT'S THE HARDEST PART OF THE RING! __"+damage+"__ damage!"
+    ];
+
+    return outcomes[outcome];
   }
 
   generateCar() {
@@ -40,9 +51,9 @@ class WeaponHandler {
   }
 
   generateInsult() {
-    let insult = Math.floor(Math.random() * 5);
+    let insult = Math.floor(Math.random() * 6);
 
-    let insults = ["a Spoony Bard", "a No Good Bastard", "a Stinky Cheater", "an Underwhelming Writer", "a Stupid Idiot"];
+    let insults = ["a Spoony Bard", "a No Good Bastard", "a Stinky Cheater", "an Underwhelming Writer", "a Stupid Idiot", "a Part-Timer"];
 
     return insults[insult];
   }

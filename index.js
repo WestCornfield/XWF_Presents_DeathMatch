@@ -134,7 +134,10 @@ const fight = async (newMsg, combatants) => {
     await delay(2000);
 
     let attackHandler = new AttackHandler();
-    let damage = attackHandler.rollDamage();
+
+    let deficit = (playerOnesTurn) ? combatants[1].hp - combatants[0].hp : combatants[0].hp - combatants[1].hp;
+
+    let damage = attackHandler.rollDamage(deficit);
 
     sentences = (damage >= 0) ? generateAttack(newMsg, playerOnesTurn, damage, sentences, combatants) : generateFailure(newMsg, playerOnesTurn, damage, sentences, combatants);
 
