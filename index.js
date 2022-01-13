@@ -1,7 +1,9 @@
-const { Attachment, Client, Intents, MessageAttachment, MessageEmbed,MessagePayload, TextChannel } = require('discord.js');
+const { Attachment, Client, Intents, MessageAttachment, MessagePayload, TextChannel } = require('discord.js');
 const { AttackHandler } = require('./handlers/AttackHandler');
 const { WeaponHandler } = require('./handlers/WeaponHandler');
 const { FightScreenGenerator } = require('./generators/FightScreenGenerator');
+const { CombatantsGenerator } = require('./generators/CombatantsGenerator');
+const { EmbedBuilder } = require('./builders/EmbedBuilder');
 
 const http = require('http');
 
@@ -9,59 +11,6 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 
 const delay = (time) => {
   return new Promise(resolve => setTimeout(resolve, time));
-}
-
-const generateCombatants = (mentions, author) => {
-  const users = mentions.users;
-  const roles = mentions.roles;
-
-  const userArr = [];
-  const roleArr = [];
-
-  users.forEach((username, id) => userArr.push({
-    key: id,
-    name: username?.username,
-    image: username.displayAvatarURL({ format: 'jpg' }),
-    hp: 100
-  }));
-
-  roles.forEach((name, id) => roleArr.push({
-    key: id,
-    name: name?.name,
-    image: './assets/locked_character.jpeg',
-    hp: 100
-  }));
-
-  const authorArr = [{
-    key: author.id,
-    name: author.username,
-    image: author.displayAvatarURL({ format: 'jpg' }),
-    hp: 100
-  }];
-
-  jobbersArr = [
-    {
-      key: '1',
-      name: "Jobber1",
-      image: "./assets/locked_character.jpeg",
-      hp: 100
-    }
-  ];
-
-  const combatantsArr = userArr.concat(roleArr).concat(authorArr).concat(jobbersArr);
-
-  return [combatantsArr[0], combatantsArr[1]];
-};
-
-const buildEmbed = (color, sentences, combatants) => {
-  return new MessageEmbed()
-    .setColor(color)
-    .setTitle('DEATHMATCH: __'+combatants[0].name+'__ vs __'+combatants[1].name+'__')
-    .setDescription(sentences.join('\r\n'))
-    .addFields(
-      { name: combatants[0].name, value: combatants[0].hp + "/100", inline:true },
-      { name: combatants[1].name, value: combatants[1].hp + "/100", inline:true }
-    );
 }
 
 const generateFailure = (newMsg, playerOnesTurn, damage, sentences, combatants) => {
@@ -75,7 +24,7 @@ const generateFailure = (newMsg, playerOnesTurn, damage, sentences, combatants) 
 
   const newSentences = updateSentences(newSentence, sentences);
 
-  const embed = buildEmbed(0x000000, newSentences, combatants);
+  const embed = new EmbedBuilder().buildEmbed(0x000000, newSentences, combatants);
   newMsg.edit({ embeds: [embed] });
 
   return sentences;
@@ -100,7 +49,7 @@ const generateAttack = (newMsg, playerOnesTurn, damage, sentences, combatants) =
 
   const file = new MessageAttachment('./assets/xwf_logo.png');
 
-  const embed = buildEmbed(color, newSentences, combatants);
+  const embed = new EmbedBuilder().buildEmbed(color, newSentences, combatants);
   newMsg.edit({ embeds: [embed] });
 
   return newSentences;
@@ -129,7 +78,7 @@ const fight = async (newMsg, combatants) => {
 
   sentences.push("The first attack goes to __" + firstTurnPlayer.name + "__");
 
-  const embed = buildEmbed(0x0099ff, sentences, combatants);
+  const embed = new EmbedBuilder().buildEmbed(0x0099ff, sentences, combatants);
   newMsg.edit({ embeds: [embed] });
 
   while (combatants[0].hp > 0 && combatants[1].hp > 0) {
@@ -179,7 +128,7 @@ const dustyFinish = async (newMsg, sentences, combatants, winner, loser) => {
   for (const sentence of surpriseEnding) {
     await delay(2000);
     const newSentences = updateSentences(sentence, sentences);
-    const embed = buildEmbed(0x800080, newSentences, combatants);
+    const embed = new EmbedBuilder().buildEmbed(0x800080, newSentences, combatants);
     newMsg.edit({ embeds: [embed] });
   }
 }
@@ -193,7 +142,7 @@ const oneLastChance = async (newMsg, sentences, combatants, winner, loser) => {
   for (const sentence of surpriseEnding) {
     await delay(2000);
     sentences = updateSentences(sentence, sentences);
-    const embed = buildEmbed(0x800080, sentences, combatants);
+    const embed = new EmbedBuilder().buildEmbed(0x800080, sentences, combatants);
     newMsg.edit({ embeds: [embed] });
   }
 
@@ -212,7 +161,7 @@ const oneLastChance = async (newMsg, sentences, combatants, winner, loser) => {
   }
 
   sentences = updateSentences(lastSentence, sentences);
-  const embed = buildEmbed(0xffffff, sentences, combatants);
+  const embed = new EmbedBuilder().buildEmbed(0xffffff, sentences, combatants);
   newMsg.edit({ embeds: [embed] });
 }
 
@@ -231,7 +180,7 @@ const generateWinnerStatement = (newMsg, sentences, combatants, winner) => {
 
   const newSentences = updateSentences(newSentence, sentences);
 
-  const embed = buildEmbed(0xffffff, newSentences, combatants);
+  const embed = new EmbedBuilder().buildEmbed(0xffffff, newSentences, combatants);
   newMsg.edit({ embeds: [embed] });
 }
 
@@ -246,7 +195,7 @@ const initiateFight = async (textChannel, combatants) => {
 
   const sentences = ["__"+combatants[0].name+"__ and __"+combatants[1].name+"__ meet in the center of the ring!"]
 
-  const embed = buildEmbed(0x0099ff, sentences, combatants);
+  const embed = new EmbedBuilder().buildEmbed(0x0099ff, sentences, combatants);
 
   textChannel.send({ embeds: [embed] }).then(newMsg => {
     fight(newMsg, combatants);
@@ -268,9 +217,10 @@ client.on("messageCreate", async msg => {
     if (content.includes("--help")) {
       textChannel.send("THE ACTION NEVER SLOWS DOWN! SELECT YOUR COMBATANTS AND SEND THEM TO THE RING!")
     } else {
-      const combatants = generateCombatants(mentions, author);
-
+      const combatantsGenerator = new CombatantsGenerator();
       const fightScreenGenerator = new FightScreenGenerator();
+
+      const combatants = combatantsGenerator.generateCombatants(mentions, author);
       const attachment = await fightScreenGenerator.generateFightScreen(combatants);
 
       textChannel.send({ files: [attachment] });
