@@ -1,7 +1,7 @@
 const { Attachment, Client, Intents, MessageAttachment, MessageEmbed,MessagePayload, TextChannel } = require('discord.js');
-const { createCanvas, loadImage } = require('canvas');
 const { AttackHandler } = require('./handlers/AttackHandler');
 const { WeaponHandler } = require('./handlers/WeaponHandler');
+const { FightScreenGenerator } = require('./generators/FightScreenGenerator');
 
 const http = require('http');
 
@@ -10,8 +10,6 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const delay = (time) => {
   return new Promise(resolve => setTimeout(resolve, time));
 }
-
-
 
 const generateCombatants = (mentions, author) => {
   const users = mentions.users;
@@ -157,10 +155,6 @@ const fight = async (newMsg, combatants) => {
   shenanigans(newMsg, sentences, combatants, winner, loser);
 }
 
-const rollDamage = () => {
-  return Math.floor(Math.random() * 40) - 2;
-}
-
 const generateReason = () => {
   const outcome = Math.floor(Math.random() * 4);
 
@@ -259,25 +253,6 @@ const initiateFight = async (textChannel, combatants) => {
   });
 };
 
-const generateFightScreen = async (combatants) => {
-  const canvas = createCanvas(300, 320);
-  const ctx = canvas.getContext('2d');
-
-  const background = await loadImage('./assets/xwf_deathmatch_screen.png');
-
-  ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-
-  const avatarOne = await loadImage(combatants[0].image);
-  const avatarTwo = await loadImage(combatants[1].image);
-
-  ctx.drawImage(avatarOne, 25, 150, 100, 100);
-  ctx.drawImage(avatarTwo, 175, 150, 100, 100);
-
-  const attachment = new MessageAttachment(canvas.toBuffer());
-
-  return attachment;
-}
-
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`)
 });
@@ -295,7 +270,8 @@ client.on("messageCreate", async msg => {
     } else {
       const combatants = generateCombatants(mentions, author);
 
-      const attachment = await generateFightScreen(combatants);
+      const fightScreenGenerator = new FightScreenGenerator();
+      const attachment = await fightScreenGenerator.generateFightScreen();
 
       textChannel.send({ files: [attachment] });
 
