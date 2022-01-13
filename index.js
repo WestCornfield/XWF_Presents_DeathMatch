@@ -3,11 +3,15 @@ const { createCanvas, loadImage } = require('canvas');
 const { AttackHandler } = require('./handlers/AttackHandler');
 const { WeaponHandler } = require('./handlers/WeaponHandler');
 
+const http = require('http');
+
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
 const delay = (time) => {
   return new Promise(resolve => setTimeout(resolve, time));
 }
+
+
 
 const generateCombatants = (mentions, author) => {
   const users = mentions.users;
@@ -307,3 +311,7 @@ client.login(process.env.TOKEN).catch(err => {
   console.error(err);
   process.exit();
 });
+
+http.createServer(function (req, res) {
+  res.write("I'm alive");
+  res.end(); }).listen(8080);
