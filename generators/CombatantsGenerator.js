@@ -31,7 +31,7 @@ class CombatantsGenerator {
       hp: 100
     }];
 
-    jobbersArr = [
+    const jobbersArr = [
       {
         key: '1',
         name: "Jobber1",

@@ -1,5 +1,4 @@
-const { MessageAttachment } = require('discord.js');
-const { createCanvas, loadImage } = require('canvas');
+const { MessageEmbed } = require('discord.js');
 
 class EmbedBuilder {
   constructor() {
@@ -18,4 +17,4 @@ class EmbedBuilder {
   }
 }
 
-module.exports = { FightScreenGenerator };
+module.exports = { EmbedBuilder };
