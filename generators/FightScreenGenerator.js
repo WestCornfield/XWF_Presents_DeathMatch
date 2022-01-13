@@ -10,7 +10,7 @@ class FightScreenGenerator {
     const canvas = createCanvas(300, 320);
     const ctx = canvas.getContext('2d');
 
-    const background = await loadImage('../assets/xwf_deathmatch_screen.png');
+    const background = await loadImage('./assets/xwf_deathmatch_screen.png');
 
     ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
@@ -25,3 +25,5 @@ class FightScreenGenerator {
     return attachment;
   }
 }
+
+module.exports = { FightScreenGenerator };

@@ -271,7 +271,7 @@ client.on("messageCreate", async msg => {
       const combatants = generateCombatants(mentions, author);
 
       const fightScreenGenerator = new FightScreenGenerator();
-      const attachment = await fightScreenGenerator.generateFightScreen();
+      const attachment = await fightScreenGenerator.generateFightScreen(combatants);
 
       textChannel.send({ files: [attachment] });
 
