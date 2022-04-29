@@ -1,6 +1,7 @@
 const { Attachment, Client, Intents, MessageAttachment, MessagePayload, TextChannel } = require('discord.js');
 const { AttackHandler } = require('./handlers/AttackHandler');
 const { WeaponHandler } = require('./handlers/WeaponHandler');
+const { VinnieHandler } = require('./handlers/VinnieHandler');
 const { FightScreenGenerator } = require('./generators/FightScreenGenerator');
 const { CombatantsGenerator } = require('./generators/CombatantsGenerator');
 const { EmbedBuilder } = require('./builders/EmbedBuilder');
@@ -45,12 +46,26 @@ const generateAttack = (newMsg, playerOnesTurn, damage, sentences, combatants) =
 
   victim.hp = (victim.hp <= damage) ? 0 : (victim.hp - damage);
 
-  const newSentences = updateSentences(newSentence, sentences);
+  let newSentences = updateSentences(newSentence, sentences);
 
   const file = new MessageAttachment('./assets/xwf_logo.png');
 
   const embed = new EmbedBuilder().buildEmbed(color, newSentences, combatants);
   newMsg.edit({ embeds: [embed] });
+
+  if (damage > 40) {
+    const vinnieHandler = new VinnieHandler();
+
+    const newSentence = vinnieHandler();
+
+    newSentences = updateSentences(newSentence, sentences);
+    const file = new MessageAttachment('./assets/xwf_logo.png');
+
+    const vinnieColor = 0xff1493;
+
+    const embed = new EmbedBuilder().buildEmbed(vinnieColor, newSentences, combatants);
+    newMsg.edit({ embeds: [embed] });
+  }
 
   return newSentences;
 }
