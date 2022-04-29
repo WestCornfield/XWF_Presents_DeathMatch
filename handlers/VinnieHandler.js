@@ -4,19 +4,17 @@ class VinnieHandler {
   }
 
   generateVinnieCommentary() {
-    if (damage > 40) {
-      const vinnieCommentary = generateVinnieism();
+    const vinnieCommentary = this.generateVinnieism();
 
-      return "🎙️ Vinnie Lane: "+vinnieCommentary
-    }
+    return "🎙️ Vinnie Lane: "+vinnieCommentary
   }
 
   generateVinnieism() {
-    let vinnieism = Math.floor(Math.random() * 6);
+    let index = Math.floor(Math.random() * 6);
 
-    let insults = ["Bodaceous!", "Pugnacious!", "Tubular!", "Gnarly!", "Whoa!", "Most Triumphant!"];
+    let vinnieisms = ["Bodaceous!", "Pugnacious!", "Tubular!", "Gnarly!", "Whoa!", "Most Triumphant!"];
 
-    return insults[insult];
+    return vinnieisms[index];
   }
 };
 

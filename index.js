@@ -40,7 +40,7 @@ const generateAttack = (newMsg, playerOnesTurn, damage, sentences, combatants) =
 
   const direction = (playerOnesTurn) ? "👉" : "👈";
 
-  const color = (playerOnesTurn) ? 0x00ff00 : 0xff0000;
+  let color = (playerOnesTurn) ? 0x00ff00 : 0xff0000;
 
   const newSentence = weaponHandler.generateAttackText(attacker, victim, damage, direction);
 
@@ -48,24 +48,19 @@ const generateAttack = (newMsg, playerOnesTurn, damage, sentences, combatants) =
 
   let newSentences = updateSentences(newSentence, sentences);
 
+  if (damage >= 35) {
+    const vinnieHandler = new VinnieHandler();
+
+    const newVinnieSentence = vinnieHandler.generateVinnieCommentary();
+
+    newSentences = updateSentences(newVinnieSentence, sentences);
+    color = 0xff1493;
+  }
+
   const file = new MessageAttachment('./assets/xwf_logo.png');
 
   const embed = new EmbedBuilder().buildEmbed(color, newSentences, combatants);
   newMsg.edit({ embeds: [embed] });
-
-  if (damage > 40) {
-    const vinnieHandler = new VinnieHandler();
-
-    const newSentence = vinnieHandler();
-
-    newSentences = updateSentences(newSentence, sentences);
-    const file = new MessageAttachment('./assets/xwf_logo.png');
-
-    const vinnieColor = 0xff1493;
-
-    const embed = new EmbedBuilder().buildEmbed(vinnieColor, newSentences, combatants);
-    newMsg.edit({ embeds: [embed] });
-  }
 
   return newSentences;
 }
