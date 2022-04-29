@@ -23,17 +23,16 @@ And the deathmatch will commence!
 
 If you don't have tag a second user, your first user will fight a jobber. If you don't tag any users, you're sending two jobbers into the death pit.
 
-PROGRESS BAR FOR V1 RELEASE (changes from beta):
-Add Damage Table - 0%
-Sub out selectWeapon for generateAttackText - 0%
+V1 COMPLETE
 
 PROGRESS BAR FOR V2 RELEASE:
-USE MESSAGE AUTHOR IN FIGHTER CHAIN - 0%
+ADD NEAT LITTLE NAMEPLATES FOR DEATHMATCH - 100% (will remove next commit)
+ADD FUN VINNIE LANE COMMENTATOR FOR BIG DAMAGE - 100% (will remove next commit)
 USE RANDOM SERVER COMBATANT IF NO COMBATANTS - 0%
 FOOT ON THE ROPE - 0%
-ADD NEAT LITTLE NAMEPLATES FOR DEATHMATCH - 0%
 ADD CRITICAL HIT FUNCTIONALITY - 0%
-ADD FUN VINNIE LANE COMMENTATOR FOR BIG DAMAGE - 0%
 
 STRETCH GOALS:
 TRIPLE THREAT DEATHMATCH - 0%
+
+RoBoy is currently hosted on https://replit.com/@WesCorwin/XWFPresentsDeathMatch#index.js and will one day have a forever home on some discord bot hosting site.
