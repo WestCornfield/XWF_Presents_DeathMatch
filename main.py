@@ -12,7 +12,12 @@ def main():
   return "Your Bot Is Ready"
 
 def run():
-  app.run(host="0.0.0.0", port=8000)
+  try:
+    app.run(host="0.0.0.0", port=8000)
+  except discord.errors.HTTPException:
+    print("\n\n\nBLOCKED BY RATE LIMITS\nRESTARTING NOW\n\n\n")
+    system("python restarter.py")
+    system('kill 1')
 
 def keep_alive():
   server = Thread(target=run)
