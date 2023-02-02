@@ -32,11 +32,12 @@ class WeaponHandler {
   }
 
   generateSuperMove(direction, attacker, victim, damage) {
-    let outcome = Math.floor(Math.random() * 2);
+    let outcome = Math.floor(Math.random() * 4);
 
     let outcomes = [direction+" __"+attacker.name + "__ sticks out one finger into __"+ victim.name + "__'s chest... FINGERPOKE OF DOOM! __"+damage+"__ damage!",
     direction+" __"+attacker.name + "__'s fist shakes, enraged at __" + victim.name +"__! 'I TOLD YOU NOT TO TOUCH IT!' WHAM! ARTHUR PUNCH! __"+damage+"__ damage!",
-    direction+" __"+attacker.name + "__ SLAMS __"+ victim.name + " on the ring apron! THAT'S THE HARDEST PART OF THE RING! __"+damage+"__ damage!"
+    direction+" __"+attacker.name + "__ SLAMS __"+ victim.name + " on the ring apron! THAT'S THE HARDEST PART OF THE RING! __"+damage+"__ damage!",
+    direction+" __"+attacker.name + "__ makes __"+ victim.name + " watch ECW December to Dismember 2006. Twice. __"+damage+"__ damage!"                
     ];
 
     return outcomes[outcome];
