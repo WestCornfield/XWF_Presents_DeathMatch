@@ -187,7 +187,9 @@ const guerreroSpecial = async (newMsg, sentences, combatants, winner, loser) => 
     "The Official Is Disqualifying __"+winner.name+"__ for illegal tripping!",
     "And __"+loser.name+"__ stands up! __"+loser.name+"__ was playing possum!",
     "The actual winner is that lyin', cheatin', and stealin' __"+loser.name+"__!"
-  ]
+  ];
+
+  selfOwn = false;
 
   for (const sentence of surpriseEnding) {
     await delay(2000);
