@@ -10,6 +10,8 @@ const http = require('http');
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
+let selfOwn = false;
+
 const delay = (time) => {
   return new Promise(resolve => setTimeout(resolve, time));
 }
@@ -24,6 +26,10 @@ const generateFailure = (newMsg, playerOnesTurn, damage, sentences, combatants) 
   attacker.hp = (attacker.hp <= selfDamage) ? 0 : (attacker.hp - selfDamage);
 
   const newSentences = updateSentences(newSentence, sentences);
+  
+  if (attacker.hp < 0) {
+      selfOwn = true;
+  }
 
   const embed = new EmbedBuilder().buildEmbed(0x000000, newSentences, combatants);
   newMsg.edit({ embeds: [embed] });
@@ -175,13 +181,33 @@ const oneLastChance = async (newMsg, sentences, combatants, winner, loser) => {
   newMsg.edit({ embeds: [embed] });
 }
 
+const guerreroSpecial = async (newMsg, sentences, combatants, winner, loser) => {
+  const surpriseEnding = [
+    "...But What's This?",
+    "The Official Is Disqualifying __"+winner.name+"__ for illegal tripping!",
+    "And __"+loser.name+"__ stands up! __"+loser.name+"__ was playing possum!",
+    "The actual winner is that lyin', cheatin', and stealin' __"+loser.name+"__!"
+  ]
+
+  for (const sentence of surpriseEnding) {
+    await delay(2000);
+    const newSentences = updateSentences(sentence, sentences);
+    const embed = new EmbedBuilder().buildEmbed(0x800080, newSentences, combatants);
+    newMsg.edit({ embeds: [embed] });
+  }
+}
+
 const shenanigans = (newMsg, sentences, combatants, winner, loser) => {
   const outcome = Math.floor(Math.random() * 100);
 
   if (outcome <= 1) {
     dustyFinish(newMsg, sentences, combatants, winner, loser);
   } else if (outcome <= 10) {
-    oneLastChance(newMsg, sentences, combatants, winner, loser);
+    if (selfOwn) {
+      guerreroSpecial(newMsg, sentences, combatants, winner, loser);
+    } else {
+      oneLastChance(newMsg, sentences, combatants, winner, loser);
+    }    
   }
 }
 
