@@ -16,7 +16,7 @@ class AttackHandler {
   }
 
   checkDamage(diceRoll) {
-    if (diceRoll <= 5) {
+    if (diceRoll <= 200) {
       return Math.floor(Math.random() * 5) - 5;
     } else if (diceRoll <= 9) {
       return 0;
@@ -42,7 +42,7 @@ class AttackHandler {
   }
 
   checkDamageSmallDeficit(diceRoll) {
-    if (diceRoll <= 5) {
+    if (diceRoll <= 200) {
       return Math.floor(Math.random() * 5) - 5;
     } else if (diceRoll <= 9) {
       return 0;
@@ -68,7 +68,7 @@ class AttackHandler {
   }
 
   checkDamageBigDeficit(diceRoll) {
-    if (diceRoll <= 5) {
+    if (diceRoll <= 200) {
       return Math.floor(Math.random() * 5) - 5;
     } else if (diceRoll <= 9) {
       return 0;
