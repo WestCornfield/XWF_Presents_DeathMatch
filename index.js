@@ -27,7 +27,7 @@ const generateFailure = (newMsg, playerOnesTurn, damage, sentences, combatants) 
 
   const newSentences = updateSentences(newSentence, sentences);
   
-  if (attacker.hp < 0) {
+  if (attacker.hp <= 0) {
       selfOwn = true;
   }
 
